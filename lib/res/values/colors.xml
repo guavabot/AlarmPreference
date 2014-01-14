@@ -17,7 +17,7 @@
 
 <resources>
     
-    <color name="dashSelected">#FF0000</color>
+    <color name="dashSelected">#58BAED</color>
     <color name="dashUnselected">#A0A0A0</color>
 
 </resources>
