@@ -1,0 +1,25 @@
+<resources>
+
+    <string name="alarm_enable">Enable</string>
+    <string name="alarm_no_time">00:00</string>
+    <string name="alarm_monday">Mo</string>
+    <string name="alarm_tuesday">Tu</string>
+    <string name="alarm_wednesday">We</string>
+    <string name="alarm_thursday">Th</string>
+    <string name="alarm_friday">Fr</string>
+    <string name="alarm_saturday">Sa</string>
+    <string name="alarm_sunday">Su</string>
+    
+    <string name="alarm_disabled">Disabled</string>
+    <string name="alarm_at">\nat&#160;</string>
+    <string-array name="alarm_days_summary">
+        <item>Mon&#160;</item>
+        <item>Tue&#160;</item>
+        <item>Wed&#160;</item>
+        <item>Thu&#160; </item>
+        <item>Fri&#160; </item>
+        <item>Sat&#160; </item>
+        <item>Sun&#160; </item>
+    </string-array>
+
+</resources>
