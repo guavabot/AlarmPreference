@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    
+    <com.guavabot.alarmpreference.AlarmPreference
+            android:key="Alarm_1"
+            android:title="Alarm 1" />
+    
+    <com.guavabot.alarmpreference.AlarmPreference
+            android:key="Alarm_2"
+            android:defaultValue="[true,1389528000000,127]"
+            android:title="Alarm 2" />
+
+</PreferenceScreen>
