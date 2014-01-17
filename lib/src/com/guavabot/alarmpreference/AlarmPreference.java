@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.preference.DialogPreference;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
@@ -145,6 +146,13 @@ public class AlarmPreference extends DialogPreference {
                 notifyChanged();
             }
         }
+    }
+    
+    @Override
+    protected void showDialog(Bundle state) {
+        super.showDialog(state);
+        //Fix for time picker not displaying hour after rotation on pre-Jelly Bean devices
+        mTimeView.setCurrentHour(mCalendar.get(Calendar.HOUR_OF_DAY));
     }
 
     @Override
