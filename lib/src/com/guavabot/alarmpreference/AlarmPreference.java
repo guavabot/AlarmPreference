@@ -16,14 +16,10 @@
 
 package com.guavabot.alarmpreference;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -31,21 +27,18 @@ import android.preference.DialogPreference;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.TextView;
 import android.widget.TimePicker;
 
 public class AlarmPreference extends DialogPreference {
     private Alarm mAlarm;
-    Calendar calendar;
+    Calendar mCalendar;
     private CheckBox mEnabled;
-    private TextView mTimeView;
-    private TimePicker mTimePicker2;
+    private TimePicker mTimeView;
     private CheckBox[] mDayCheckBoxes = new CheckBox[7];
-    private int[] checkBoxesIds = new int[] {
+    private int[] mCheckBoxesIds = new int[] {
             R.id.checkMonday,
             R.id.checkTuesday,
             R.id.checkWednesday,
@@ -62,15 +55,15 @@ public class AlarmPreference extends DialogPreference {
         setPositiveButtonText(android.R.string.ok);
         setNegativeButtonText(android.R.string.cancel);
         mAlarm = new Alarm();
-        calendar = Calendar.getInstance();
+        mCalendar = Calendar.getInstance();
     }
     
     @Override
     protected void onBindDialogView(View v) {
         super.onBindDialogView(v);
-        
-        mEnabled = (CheckBox) v.findViewById(R.id.enable_alarm);
+
         boolean alarmOn = mAlarm.isAlarmOn();
+        mEnabled = (CheckBox) v.findViewById(R.id.enable_alarm);
         mEnabled.setChecked(alarmOn);
         mEnabled.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             @Override
@@ -81,41 +74,18 @@ public class AlarmPreference extends DialogPreference {
                 }
             }
         });
-        
-        mTimeView = (TextView) v.findViewById(R.id.alarm_time);
-        mNormalTextColor =  mTimeView.getTextColors();
-        calendar.setTimeInMillis(mAlarm.getTriggerTime());
-        final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.US);
-        mTimeView.setText(sdf.format(calendar.getTime()));
-        mTimeView.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setTitle(null);
-                mTimePicker2 = new TimePicker(getContext());
-                mTimePicker2.setCurrentHour(calendar.get(Calendar.HOUR_OF_DAY));
-                mTimePicker2.setCurrentMinute(calendar.get(Calendar.MINUTE));
-                builder.setView(mTimePicker2);
-                builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        calendar.set(Calendar.HOUR_OF_DAY, mTimePicker2.getCurrentHour());
-                        calendar.set(Calendar.MINUTE, mTimePicker2.getCurrentMinute());
-                        calendar.set(Calendar.SECOND, 0);
-                        mTimeView.setText(sdf.format(calendar.getTime()));
-                    }
-                });
-                builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                    }
-                });
-                AlertDialog alert = builder.create();
-                alert.show();
-            }
-        });
+        mNormalTextColor =  mEnabled.getTextColors();
+
+        mCalendar.setTimeInMillis(mAlarm.getTriggerTime());
+        mTimeView = (TimePicker) v.findViewById(R.id.alarm_time); 
+        mTimeView.setIs24HourView(true);
+        mTimeView.setDescendantFocusability(TimePicker.FOCUS_BLOCK_DESCENDANTS);
+        mTimeView.setCurrentHour(mCalendar.get(Calendar.HOUR_OF_DAY));
+        mTimeView.setCurrentMinute(mCalendar.get(Calendar.MINUTE));
         
         int weeklyAlarms = mAlarm.getWeeklyAlarms();
         for (int i = 0; i < 7; i++) {
-            mDayCheckBoxes[i] = (CheckBox) v.findViewById(checkBoxesIds[i]);
+            mDayCheckBoxes[i] = (CheckBox) v.findViewById(mCheckBoxesIds[i]);
             boolean dayAlarmOn = (weeklyAlarms & (1 << i)) != 0;
             mDayCheckBoxes[i].setChecked(dayAlarmOn);
             if (dayAlarmOn) {
@@ -123,6 +93,7 @@ public class AlarmPreference extends DialogPreference {
                 mDayCheckBoxes[i].setTextAppearance(getContext(), R.style.boldText);
             } else {
                 mDayCheckBoxes[i].setTextColor(Color.GRAY);
+                mDayCheckBoxes[i].setTextAppearance(getContext(), R.style.normalText);
             }
             
             mDayCheckBoxes[i].setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -152,8 +123,12 @@ public class AlarmPreference extends DialogPreference {
         super.onDialogClosed(positiveResult);
         if (positiveResult) {
             
+          mCalendar.set(Calendar.HOUR_OF_DAY, mTimeView.getCurrentHour());
+          mCalendar.set(Calendar.MINUTE, mTimeView.getCurrentMinute());
+          mCalendar.set(Calendar.SECOND, 0);
+            
             mAlarm.setAlarmOn(mEnabled.isChecked());
-            mAlarm.setTriggerTime(calendar.getTimeInMillis());
+            mAlarm.setTriggerTime(mCalendar.getTimeInMillis());
             int weeklyAlarms = mAlarm.getWeeklyAlarms();
             for (int i = 0; i < 7; i++) {
                 if (mDayCheckBoxes[i].isChecked()) {
@@ -196,6 +171,7 @@ public class AlarmPreference extends DialogPreference {
         if (!mAlarm.isAlarmOn()) {
             return getContext().getResources().getText(R.string.alarm_disabled);
         }
+        
         String[] dayNames = getContext().getResources().getStringArray(R.array.alarm_days_summary);
         StringBuilder builder = new StringBuilder();
         int weeklyAlarms = mAlarm.getWeeklyAlarms();
@@ -209,7 +185,7 @@ public class AlarmPreference extends DialogPreference {
     
     public void setAlarm(Alarm alarm) {
         mAlarm = alarm;
-        calendar.setTimeInMillis(mAlarm.getTriggerTime());
+        mCalendar.setTimeInMillis(mAlarm.getTriggerTime());
     }
     
     public Alarm getAlarm() {
