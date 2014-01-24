@@ -23,16 +23,15 @@ import org.json.JSONException;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 public class Alarm implements Parcelable {
-    public static int Monday = 0x01;
-    public static int Tuesday = 0x02;
-    public static int Wednesday = 0x04;
-    public static int Thursday = 0x08;
-    public static int Friday = 0x10;
-    public static int Saturday = 0x20;
-    public static int Sunday = 0x40;
+    public static final int Monday = 0x01;
+    public static final int Tuesday = 0x02;
+    public static final int Wednesday = 0x04;
+    public static final int Thursday = 0x08;
+    public static final int Friday = 0x10;
+    public static final int Saturday = 0x20;
+    public static final int Sunday = 0x40;
     
     private boolean mAlarmOn;
     private long mTriggerTime;
@@ -96,7 +95,7 @@ public class Alarm implements Parcelable {
                 mTriggerTime = jsonArray.optLong(1, Calendar.getInstance().getTimeInMillis());
                 mWeeklyAlarms = jsonArray.optInt(2, 0x7F); //default 7 days on
             } catch (JSONException e) {
-                Log.e("Alarm", "Parsing JSONArray from invalid String alarmData", e);
+                throw new RuntimeException("Parsing alarm from invalid String alarmData", e);
             }
         }
     }

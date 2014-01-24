@@ -35,11 +35,11 @@ import android.widget.TimePicker;
 
 public class AlarmPreference extends DialogPreference {
     private Alarm mAlarm;
-    Calendar mCalendar;
+    private Calendar mCalendar;
     private CheckBox mEnabled;
     private TimePicker mTimeView;
     private CheckBox[] mDayCheckBoxes = new CheckBox[7];
-    private int[] mCheckBoxesIds = new int[] {
+    private static final int[] mCheckBoxesIds = new int[] {
             R.id.checkMonday,
             R.id.checkTuesday,
             R.id.checkWednesday,
@@ -48,10 +48,10 @@ public class AlarmPreference extends DialogPreference {
             R.id.checkSaturday,
             R.id.checkSunday
     };
-    ColorStateList mNormalTextColor;
+    private ColorStateList mNormalTextColor;
     
-    public AlarmPreference(Context ctxt, AttributeSet attrs) {
-        super(ctxt, attrs);
+    public AlarmPreference(Context context, AttributeSet attrs) {
+        super(context, attrs);
         setDialogLayoutResource(R.layout.alarm_preference);
         setPositiveButtonText(android.R.string.ok);
         setNegativeButtonText(android.R.string.cancel);
@@ -79,7 +79,7 @@ public class AlarmPreference extends DialogPreference {
 
         mCalendar.setTimeInMillis(mAlarm.getTriggerTime());
         mTimeView = (TimePicker) v.findViewById(R.id.alarm_time); 
-        mTimeView.setIs24HourView(true);
+        mTimeView.setIs24HourView(true); //not enough space to display am/pm view
         mTimeView.setDescendantFocusability(TimePicker.FOCUS_BLOCK_DESCENDANTS);
         mTimeView.setCurrentHour(mCalendar.get(Calendar.HOUR_OF_DAY));
         mTimeView.setCurrentMinute(mCalendar.get(Calendar.MINUTE));
@@ -122,8 +122,8 @@ public class AlarmPreference extends DialogPreference {
     @Override
     protected void onDialogClosed(boolean positiveResult) {
         super.onDialogClosed(positiveResult);
+        
         if (positiveResult) {
-            
           mCalendar.set(Calendar.HOUR_OF_DAY, mTimeView.getCurrentHour());
           mCalendar.set(Calendar.MINUTE, mTimeView.getCurrentMinute());
           mCalendar.set(Calendar.SECOND, 0);
@@ -140,8 +140,8 @@ public class AlarmPreference extends DialogPreference {
             }
             mAlarm.setWeeklyAlarms(weeklyAlarms);
 
-            setSummary(getSummary());
             if (callChangeListener(mAlarm.toString())) {
+                setSummary(getSummary());
                 persistString(mAlarm.toString());
                 notifyChanged();
             }
@@ -186,9 +186,9 @@ public class AlarmPreference extends DialogPreference {
         for (int i = 0; i < 7; i++) {
             if ((weeklyAlarms & (1 << i)) != 0) builder.append(dayNames[i]);
         }
-        builder.append(getContext().getResources().getText(R.string.alarm_at));
-        builder.append(DateFormat.getTimeFormat(getContext()).format(new Date(mAlarm.getTriggerTime())));
-        return builder.toString();
+        return builder.append(getContext().getResources().getText(R.string.alarm_at))
+        .append(DateFormat.getTimeFormat(getContext()).format(new Date(mAlarm.getTriggerTime())))
+        .toString();
     }
     
     public void setAlarm(Alarm alarm) {
