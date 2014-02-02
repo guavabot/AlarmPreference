@@ -3,126 +3,89 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_gravity="center_horizontal"
-    android:paddingLeft="5dp"
-    android:paddingRight="5dp"
-    android:paddingBottom="10dp" >
-    
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:paddingBottom="10dp"
+    android:paddingTop="10dp" >
+
     <CheckBox
         android:id="@+id/enable_alarm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true" />
+        android:layout_marginLeft="10dp"
+        android:gravity="center" />
 
     <TimePicker
         android:id="@+id/alarm_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true" 
-        android:layout_centerHorizontal="true"
-        android:padding="4dp"
-        />
-    
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true" />
+
     <LinearLayout
         android:id="@+id/weekdays"
-        android:orientation="horizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/alarm_time" >
-
-        <CheckBox
-            android:id="@+id/checkMonday"
-            android:button="@android:color/transparent"
-            android:drawableBottom="@drawable/alarm_dash" 
-            android:paddingLeft="0dp"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-			android:gravity="bottom|center_horizontal"
-            android:text="@string/alarm_monday"
-            android:singleLine="true"
-        	android:textAppearance="?android:attr/textAppearanceSmall" />
-
-        <CheckBox
-            android:id="@+id/checkTuesday"
-            android:button="@android:color/transparent" 
-            android:drawableBottom="@drawable/alarm_dash" 
-            android:paddingLeft="0dp"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-			android:gravity="bottom|center_horizontal"
-            android:text="@string/alarm_tuesday"
-            android:singleLine="true"
-        	android:textAppearance="?android:attr/textAppearanceSmall" />
-
-        <CheckBox
-            android:id="@+id/checkWednesday"
-            android:button="@android:color/transparent" 
-            android:drawableBottom="@drawable/alarm_dash" 
-            android:paddingLeft="0dp"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-			android:gravity="bottom|center_horizontal"
-            android:text="@string/alarm_wednesday"
-            android:singleLine="true"
-        	android:textAppearance="?android:attr/textAppearanceSmall" />
-
-        <CheckBox
-            android:id="@+id/checkThursday"
-            android:button="@android:color/transparent" 
-            android:drawableBottom="@drawable/alarm_dash" 
-            android:paddingLeft="0dp"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-			android:gravity="bottom|center_horizontal"
-            android:text="@string/alarm_thursday"
-            android:singleLine="true"
-        	android:textAppearance="?android:attr/textAppearanceSmall" />
-
-        <CheckBox
-            android:id="@+id/checkFriday"
-            android:button="@android:color/transparent" 
-            android:drawableBottom="@drawable/alarm_dash" 
-            android:paddingLeft="0dp"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-			android:gravity="bottom|center_horizontal"
-            android:text="@string/alarm_friday"
-            android:singleLine="true"
-        	android:textAppearance="?android:attr/textAppearanceSmall" />
-        
-        <CheckBox
-            android:id="@+id/checkSaturday" 
-            android:button="@android:color/transparent" 
-            android:drawableBottom="@drawable/alarm_dash" 
-            android:paddingLeft="0dp"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-			android:gravity="bottom|center_horizontal"
-            android:text="@string/alarm_saturday"
-            android:singleLine="true"
-        	android:textAppearance="?android:attr/textAppearanceSmall"/>
+        android:layout_below="@+id/alarm_time"
+        android:orientation="horizontal" >
 
         <CheckBox
             android:id="@+id/checkSunday"
-            android:button="@android:color/transparent" 
-            android:drawableBottom="@drawable/alarm_dash" 
-            android:paddingLeft="0dp"
-            android:layout_weight="1"
+            style="@style/alarmDayCheckbox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-			android:gravity="bottom|center_horizontal"
-            android:text="@string/alarm_sunday"
-            android:singleLine="true"
-        	android:textAppearance="?android:attr/textAppearanceSmall"/>
+            android:layout_weight="1"
+            android:text="@string/alarm_sunday" />
 
+        <CheckBox
+            android:id="@+id/checkMonday"
+            style="@style/alarmDayCheckbox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/alarm_monday" />
+
+        <CheckBox
+            android:id="@+id/checkTuesday"
+            style="@style/alarmDayCheckbox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/alarm_tuesday" />
+
+        <CheckBox
+            android:id="@+id/checkWednesday"
+            style="@style/alarmDayCheckbox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/alarm_wednesday" />
+
+        <CheckBox
+            android:id="@+id/checkThursday"
+            style="@style/alarmDayCheckbox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/alarm_thursday" />
+
+        <CheckBox
+            android:id="@+id/checkFriday"
+            style="@style/alarmDayCheckbox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/alarm_friday" />
+
+        <CheckBox
+            android:id="@+id/checkSaturday"
+            style="@style/alarmDayCheckbox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/alarm_saturday" />
     </LinearLayout>
-    
+
 </RelativeLayout>

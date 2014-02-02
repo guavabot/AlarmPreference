@@ -79,7 +79,6 @@ public class AlarmPreference extends DialogPreference {
 
         mCalendar.setTimeInMillis(mAlarm.getTriggerTime());
         mTimeView = (TimePicker) v.findViewById(R.id.alarm_time); 
-        mTimeView.setIs24HourView(true); //not enough space to display am/pm view
         mTimeView.setDescendantFocusability(TimePicker.FOCUS_BLOCK_DESCENDANTS);
         mTimeView.setCurrentHour(mCalendar.get(Calendar.HOUR_OF_DAY));
         mTimeView.setCurrentMinute(mCalendar.get(Calendar.MINUTE));
