@@ -34,32 +34,55 @@ public class Alarm implements Parcelable {
     public static final int Sunday = 0x40;
     
     private boolean mAlarmOn;
+    /**
+     * Unix timestamp in ms
+     */
     private long mTriggerTime;
+    /**
+     * Stores bitwise if the alarm is enabled for each day of the week.
+     * Monday is bit 0
+     */
     private int mWeeklyAlarms;
+    
+    /**
+     * optional id field
+     */
+    private long mId;
 
+    /**
+     * Default alarm is off
+     */
     public Alarm() {
         mAlarmOn = false;
         mTriggerTime = Calendar.getInstance().getTimeInMillis();
         mWeeklyAlarms = 0x7F; //7 days on
+        mId = -1;
+    }
+    
+    public Alarm(boolean alarmOn, long triggerTime, int weeklyAlarms) {
+        this (alarmOn, triggerTime, weeklyAlarms, -1);
     }
 
-    public Alarm(boolean alarmOn, long triggerTime, int weeklyAlarms) {
+    public Alarm(boolean alarmOn, long triggerTime, int weeklyAlarms, long id) {
         mAlarmOn = alarmOn;
         mTriggerTime = triggerTime;
         mWeeklyAlarms = weeklyAlarms;
+        mId = id;
     }
     
     public Alarm(JSONArray jsonArray) {
         this(
                 jsonArray.optBoolean(0),
                 jsonArray.optLong(1, Calendar.getInstance().getTimeInMillis()),
-                jsonArray.optInt(2, 0x7F)); //default 7 days on
+                jsonArray.optInt(2, 0x7F), //default 7 days on
+                jsonArray.optInt(3, -1));
     }
 
     public Alarm(Parcel in) {
         mAlarmOn = in.readByte() != 0;
         mTriggerTime = in.readLong();
         mWeeklyAlarms = in.readInt();
+        mId = in.readLong();
     }
 
     @Override
@@ -72,6 +95,7 @@ public class Alarm implements Parcelable {
         dest.writeByte((byte) (mAlarmOn ? 1 : 0));
         dest.writeLong(mTriggerTime);
         dest.writeInt(mWeeklyAlarms);
+        dest.writeLong(mId);
     }
     
     public JSONArray toJSONArray() {
@@ -79,6 +103,7 @@ public class Alarm implements Parcelable {
         jsonArray.put(mAlarmOn);
         jsonArray.put(mTriggerTime);
         jsonArray.put(mWeeklyAlarms);
+        jsonArray.put(mId);
         return jsonArray;
     }
     
@@ -94,6 +119,7 @@ public class Alarm implements Parcelable {
                 mAlarmOn = jsonArray.optBoolean(0, true);
                 mTriggerTime = jsonArray.optLong(1, Calendar.getInstance().getTimeInMillis());
                 mWeeklyAlarms = jsonArray.optInt(2, 0x7F); //default 7 days on
+                mId = jsonArray.optInt(3, -1);
             } catch (JSONException e) {
                 throw new RuntimeException("Parsing alarm from invalid String alarmData", e);
             }
@@ -137,6 +163,14 @@ public class Alarm implements Parcelable {
         }
     }
     
+    public long getId() {
+        return mId;
+    }
+
+    public void setId(long id) {
+        mId = id;
+    }
+
     public static final Parcelable.Creator<Alarm> CREATOR = new Parcelable.Creator<Alarm>() {
         public Alarm createFromParcel(Parcel in) {
             return new Alarm(in);
