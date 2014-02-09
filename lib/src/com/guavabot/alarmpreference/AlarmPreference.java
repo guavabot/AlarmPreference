@@ -78,7 +78,8 @@ public class AlarmPreference extends DialogPreference {
         mNormalTextColor =  mEnabled.getTextColors();
 
         mCalendar.setTimeInMillis(mAlarm.getTriggerTime());
-        mTimeView = (TimePicker) v.findViewById(R.id.alarm_time); 
+        mTimeView = (TimePicker) v.findViewById(R.id.alarm_time);
+        mTimeView.setIs24HourView(DateFormat.is24HourFormat(getContext()));
         mTimeView.setDescendantFocusability(TimePicker.FOCUS_BLOCK_DESCENDANTS);
         mTimeView.setCurrentHour(mCalendar.get(Calendar.HOUR_OF_DAY));
         mTimeView.setCurrentMinute(mCalendar.get(Calendar.MINUTE));
