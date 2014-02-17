@@ -89,24 +89,11 @@ public class AlarmPreference extends DialogPreference {
             mDayCheckBoxes[i] = (CheckBox) v.findViewById(mCheckBoxesIds[i]);
             boolean dayAlarmOn = (weeklyAlarms & (1 << i)) != 0;
             mDayCheckBoxes[i].setChecked(dayAlarmOn);
-            if (dayAlarmOn) {
-                mDayCheckBoxes[i].setTextColor(mNormalTextColor);
-                mDayCheckBoxes[i].setTextAppearance(getContext(), R.style.boldText);
-            } else {
-                mDayCheckBoxes[i].setTextColor(Color.GRAY);
-                mDayCheckBoxes[i].setTextAppearance(getContext(), R.style.normalText);
-            }
-            
+            formatDayCheckBox(mDayCheckBoxes[i], dayAlarmOn);
             mDayCheckBoxes[i].setOnCheckedChangeListener(new OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked) {
-                        buttonView.setTextColor(mNormalTextColor);
-                        buttonView.setTextAppearance(getContext(), R.style.boldText);
-                    } else {
-                        buttonView.setTextColor(Color.GRAY);
-                        buttonView.setTextAppearance(getContext(), R.style.normalText);
-                    }
+                    formatDayCheckBox(buttonView, isChecked);
                 }
             });
         }
@@ -198,6 +185,16 @@ public class AlarmPreference extends DialogPreference {
     
     public Alarm getAlarm() {
         return mAlarm;
+    }
+
+    private void formatDayCheckBox(CompoundButton dayCheckBox, boolean isChecked) {
+        if (isChecked) {
+            dayCheckBox.setTextColor(mNormalTextColor);
+            dayCheckBox.setTextAppearance(getContext(), R.style.boldText);
+        } else {
+            dayCheckBox.setTextColor(Color.GRAY);
+            dayCheckBox.setTextAppearance(getContext(), R.style.normalText);
+        }
     }
     
 } 

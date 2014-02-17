@@ -22,71 +22,13 @@
         android:id="@+id/alarm_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/enable_alarm"
-        android:layout_alignParentTop="true" />
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/enable_alarm" />
 
-    <LinearLayout
-        android:id="@+id/weekdays"
+    <include
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/alarm_time"
-        android:orientation="horizontal" >
-
-        <CheckBox
-            android:id="@+id/checkSunday"
-            style="@style/alarmDayCheckbox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/alarm_sunday" />
-
-        <CheckBox
-            android:id="@+id/checkMonday"
-            style="@style/alarmDayCheckbox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/alarm_monday" />
-
-        <CheckBox
-            android:id="@+id/checkTuesday"
-            style="@style/alarmDayCheckbox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/alarm_tuesday" />
-
-        <CheckBox
-            android:id="@+id/checkWednesday"
-            style="@style/alarmDayCheckbox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/alarm_wednesday" />
-
-        <CheckBox
-            android:id="@+id/checkThursday"
-            style="@style/alarmDayCheckbox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/alarm_thursday" />
-
-        <CheckBox
-            android:id="@+id/checkFriday"
-            style="@style/alarmDayCheckbox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/alarm_friday" />
-
-        <CheckBox
-            android:id="@+id/checkSaturday"
-            style="@style/alarmDayCheckbox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/alarm_saturday" />
-    </LinearLayout>
+        layout="@layout/weekdays_horizontal" />
 
 </RelativeLayout>
