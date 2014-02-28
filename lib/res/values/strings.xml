@@ -10,7 +10,7 @@
     <string name="alarm_sunday">Su</string>
     
     <string name="alarm_disabled">Disabled</string>
-    <string name="alarm_at">\nat&#160;</string>
+    <string name="alarm_at">\nat %1$s</string>
     <string-array name="alarm_days_summary">
         <item>Mon&#160;</item>
         <item>Tue&#160;</item>

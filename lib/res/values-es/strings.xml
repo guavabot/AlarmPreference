@@ -10,7 +10,7 @@
     <string name="alarm_sunday">Do</string>
     
     <string name="alarm_disabled">Apagada</string>
-    <string name="alarm_at">\na las&#160;</string>
+    <string name="alarm_at">\na las %1$s</string>
     <string-array name="alarm_days_summary">
         <item>Lun&#160;</item>
         <item>Mar&#160;</item>

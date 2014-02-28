@@ -7,7 +7,6 @@
     
     <com.guavabot.alarmpreference.AlarmPreference
             android:key="Alarm_2"
-            android:defaultValue="[true,1389528000000,127]"
             android:title="Alarm 2" />
 
 </PreferenceScreen>

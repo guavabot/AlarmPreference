@@ -16,8 +16,8 @@
 
 package com.guavabot.alarmpreference;
 
-import java.util.Calendar;
-import java.util.Date;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -35,9 +35,8 @@ import android.widget.TimePicker;
 
 public class AlarmPreference extends DialogPreference {
     private Alarm mAlarm;
-    private Calendar mCalendar;
-    private CheckBox mEnabled;
-    private TimePicker mTimeView;
+    private CheckBox mEnabledChBox;
+    private TimePicker mTimePicker;
     private CheckBox[] mDayCheckBoxes = new CheckBox[7];
     private static final int[] mCheckBoxesIds = new int[] {
             R.id.checkMonday,
@@ -56,7 +55,6 @@ public class AlarmPreference extends DialogPreference {
         setPositiveButtonText(android.R.string.ok);
         setNegativeButtonText(android.R.string.cancel);
         mAlarm = new Alarm();
-        mCalendar = Calendar.getInstance();
     }
     
     @Override
@@ -64,25 +62,24 @@ public class AlarmPreference extends DialogPreference {
         super.onBindDialogView(v);
 
         boolean alarmOn = mAlarm.isAlarmOn();
-        mEnabled = (CheckBox) v.findViewById(R.id.enable_alarm);
-        mEnabled.setChecked(alarmOn);
-        mEnabled.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+        mEnabledChBox = (CheckBox) v.findViewById(R.id.enable_alarm);
+        mEnabledChBox.setChecked(alarmOn);
+        mEnabledChBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mTimeView.setEnabled(isChecked);
+                mTimePicker.setEnabled(isChecked);
                 for (CheckBox dayCheckBox : mDayCheckBoxes) {
                     dayCheckBox.setEnabled(isChecked);
                 }
             }
         });
-        mNormalTextColor =  mEnabled.getTextColors();
+        mNormalTextColor =  mEnabledChBox.getTextColors();
 
-        mCalendar.setTimeInMillis(mAlarm.getTriggerTime());
-        mTimeView = (TimePicker) v.findViewById(R.id.alarm_time);
-        mTimeView.setIs24HourView(DateFormat.is24HourFormat(getContext()));
-        mTimeView.setDescendantFocusability(TimePicker.FOCUS_BLOCK_DESCENDANTS);
-        mTimeView.setCurrentHour(mCalendar.get(Calendar.HOUR_OF_DAY));
-        mTimeView.setCurrentMinute(mCalendar.get(Calendar.MINUTE));
+        mTimePicker = (TimePicker) v.findViewById(R.id.alarm_time);
+        mTimePicker.setIs24HourView(DateFormat.is24HourFormat(getContext()));
+        mTimePicker.setDescendantFocusability(TimePicker.FOCUS_BLOCK_DESCENDANTS);
+        mTimePicker.setCurrentHour(mAlarm.getTime().getHourOfDay());
+        mTimePicker.setCurrentMinute(mAlarm.getTime().getMinuteOfHour());
         
         int weeklyAlarms = mAlarm.getWeeklyAlarms();
         for (int i = 0; i < 7; i++) {
@@ -99,7 +96,7 @@ public class AlarmPreference extends DialogPreference {
         }
         
         if (!alarmOn) {
-            mTimeView.setEnabled(false);
+            mTimePicker.setEnabled(false);
             for (CheckBox dayCheckBox : mDayCheckBoxes) {
                 dayCheckBox.setEnabled(false);
             }
@@ -111,12 +108,8 @@ public class AlarmPreference extends DialogPreference {
         super.onDialogClosed(positiveResult);
         
         if (positiveResult) {
-          mCalendar.set(Calendar.HOUR_OF_DAY, mTimeView.getCurrentHour());
-          mCalendar.set(Calendar.MINUTE, mTimeView.getCurrentMinute());
-          mCalendar.set(Calendar.SECOND, 0);
-            
-            mAlarm.setAlarmOn(mEnabled.isChecked());
-            mAlarm.setTriggerTime(mCalendar.getTimeInMillis());
+            mAlarm.setAlarmOn(mEnabledChBox.isChecked());
+            mAlarm.setTime(mTimePicker.getCurrentHour(), mTimePicker.getCurrentMinute());
             int weeklyAlarms = mAlarm.getWeeklyAlarms();
             for (int i = 0; i < 7; i++) {
                 if (mDayCheckBoxes[i].isChecked()) {
@@ -139,7 +132,7 @@ public class AlarmPreference extends DialogPreference {
     protected void showDialog(Bundle state) {
         super.showDialog(state);
         //Fix for time picker not displaying hour after rotation on pre-Jelly Bean devices
-        mTimeView.setCurrentHour(mCalendar.get(Calendar.HOUR_OF_DAY));
+        mTimePicker.setCurrentHour(mAlarm.getTime().getHourOfDay());
     }
 
     @Override
@@ -173,14 +166,14 @@ public class AlarmPreference extends DialogPreference {
         for (int i = 0; i < 7; i++) {
             if ((weeklyAlarms & (1 << i)) != 0) builder.append(dayNames[i]);
         }
-        return builder.append(getContext().getResources().getText(R.string.alarm_at))
-        .append(DateFormat.getTimeFormat(getContext()).format(new Date(mAlarm.getTriggerTime())))
-        .toString();
+        
+        DateTimeFormatter timeFmt = DateTimeFormat.shortTime();
+        builder.append(getContext().getString(R.string.alarm_at, timeFmt.print(mAlarm.getTime())));
+        return builder.toString();
     }
     
     public void setAlarm(Alarm alarm) {
         mAlarm = alarm;
-        mCalendar.setTimeInMillis(mAlarm.getTriggerTime());
     }
     
     public Alarm getAlarm() {

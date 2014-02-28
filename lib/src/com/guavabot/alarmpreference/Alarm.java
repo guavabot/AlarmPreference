@@ -16,114 +16,117 @@
 
 package com.guavabot.alarmpreference;
 
-import java.util.Calendar;
-
-import org.json.JSONArray;
+import org.joda.time.DateTime;
+import org.joda.time.LocalTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Alarm implements Parcelable {
-    public static final int Monday = 0x01;
-    public static final int Tuesday = 0x02;
-    public static final int Wednesday = 0x04;
-    public static final int Thursday = 0x08;
-    public static final int Friday = 0x10;
-    public static final int Saturday = 0x20;
-    public static final int Sunday = 0x40;
+    public static final int Monday = 1<<0;
+    public static final int Tuesday = 1<<1;
+    public static final int Wednesday = 1<<2;
+    public static final int Thursday = 1<<3;
+    public static final int Friday = 1<<4;
+    public static final int Saturday = 1<<5;
+    public static final int Sunday = 1<<6;
+
+    private static final String KEY_ID = "id";
+    private static final String KEY_WEEKLY_ALARMS = "weeklyAlarms";
+    private static final String KEY_TIME = "time";
+    private static final String KEY_ALARM_ON = "alarmOn";
+    public static final DateTimeFormatter TIME_FMT = DateTimeFormat.forPattern("HH:mm:ss.SSS");
     
     private boolean mAlarmOn;
-    /**
-     * Unix timestamp in ms
-     */
-    private long mTriggerTime;
-    /**
-     * Stores bitwise if the alarm is enabled for each day of the week.
-     * Monday is bit 0
-     */
+    private LocalTime mTime;
+    /** Stores bitwise if the alarm is enabled for each day of the week.
+     * Monday is bit 0 */
     private int mWeeklyAlarms;
-    
-    /**
-     * optional id field
-     */
+    /** optional id field */
     private long mId;
 
     /**
-     * Default alarm is off
+     * Default alarm is off, with time set to current time and all week days activated
      */
     public Alarm() {
-        mAlarmOn = false;
-        mTriggerTime = Calendar.getInstance().getTimeInMillis();
-        mWeeklyAlarms = 0x7F; //7 days on
-        mId = -1;
+        this(false, new LocalTime(), 0x7F, -1);
     }
     
-    public Alarm(boolean alarmOn, long triggerTime, int weeklyAlarms) {
-        this (alarmOn, triggerTime, weeklyAlarms, -1);
+    public Alarm(boolean alarmOn, LocalTime time, int weeklyAlarms) {
+        this (alarmOn, time, weeklyAlarms, -1);
     }
 
-    public Alarm(boolean alarmOn, long triggerTime, int weeklyAlarms, long id) {
+    public Alarm(boolean alarmOn, LocalTime time, int weeklyAlarms, long id) {
         mAlarmOn = alarmOn;
-        mTriggerTime = triggerTime;
+        mTime = time;
         mWeeklyAlarms = weeklyAlarms;
         mId = id;
     }
     
-    public Alarm(JSONArray jsonArray) {
-        this(
-                jsonArray.optBoolean(0),
-                jsonArray.optLong(1, Calendar.getInstance().getTimeInMillis()),
-                jsonArray.optInt(2, 0x7F), //default 7 days on
-                jsonArray.optInt(3, -1));
+    public Alarm(JSONObject json) {
+        setValues(json);
     }
 
     public Alarm(Parcel in) {
         mAlarmOn = in.readByte() != 0;
-        mTriggerTime = in.readLong();
+        String time = in.readString();
+        mTime = TIME_FMT.parseLocalTime(time);
         mWeeklyAlarms = in.readInt();
         mId = in.readLong();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeByte((byte) (mAlarmOn ? 1 : 0));
+        dest.writeString(TIME_FMT.print(mTime));
+        dest.writeInt(mWeeklyAlarms);
+        dest.writeLong(mId);
     }
 
     @Override
     public int describeContents() {
         return 0;
     }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeByte((byte) (mAlarmOn ? 1 : 0));
-        dest.writeLong(mTriggerTime);
-        dest.writeInt(mWeeklyAlarms);
-        dest.writeLong(mId);
-    }
     
-    public JSONArray toJSONArray() {
-        JSONArray jsonArray = new JSONArray();
-        jsonArray.put(mAlarmOn);
-        jsonArray.put(mTriggerTime);
-        jsonArray.put(mWeeklyAlarms);
-        jsonArray.put(mId);
-        return jsonArray;
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        try {
+            json.put(KEY_ALARM_ON, mAlarmOn);
+            json.put(KEY_TIME, TIME_FMT.print(mTime));
+            json.put(KEY_WEEKLY_ALARMS, mWeeklyAlarms);
+            json.put(KEY_ID, mId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return json;
     }
     
     @Override
     public String toString() {
-        return toJSONArray().toString();
+        return toJSON().toString();
     }
     
     public void setValues(String alarmData) {
         if (alarmData != null) {
             try {
-                JSONArray jsonArray = new JSONArray(alarmData);
-                mAlarmOn = jsonArray.optBoolean(0, true);
-                mTriggerTime = jsonArray.optLong(1, Calendar.getInstance().getTimeInMillis());
-                mWeeklyAlarms = jsonArray.optInt(2, 0x7F); //default 7 days on
-                mId = jsonArray.optInt(3, -1);
+                JSONObject json = new JSONObject(alarmData);
+                setValues(json);
             } catch (JSONException e) {
                 throw new RuntimeException("Parsing alarm from invalid String alarmData", e);
             }
         }
+    }
+
+    public void setValues(JSONObject json) {
+        mAlarmOn = json.optBoolean(KEY_ALARM_ON, true);
+        String time = json.optString(KEY_TIME, null);
+        mTime = time != null ? TIME_FMT.parseLocalTime(time) : new LocalTime();
+        mWeeklyAlarms = json.optInt(KEY_WEEKLY_ALARMS, 0x7F); //default 7 days on
+        mId = json.optInt(KEY_ID, -1);
     }
 
     public boolean isAlarmOn() {
@@ -135,12 +138,19 @@ public class Alarm implements Parcelable {
         mAlarmOn = alarmOn;
     }
 
-    public long getTriggerTime() {
-        return mTriggerTime;
+    public LocalTime getTime() {
+        return mTime;
     }
 
-    public void setTriggerTime(long triggerTime) {
-        mTriggerTime = triggerTime;
+    public void setTime(LocalTime time) {
+        mTime = time;
+    }
+    
+    public void setTime(int hourOfDay, int minuteOfHour) {
+        mTime = mTime
+                .withHourOfDay(hourOfDay)
+                .withMinuteOfHour(minuteOfHour)
+                .withSecondOfMinute(0);
     }
 
     public int getWeeklyAlarms() {
@@ -151,11 +161,11 @@ public class Alarm implements Parcelable {
         mWeeklyAlarms = weeklyAlarms;
     }
     
-    public boolean isDayAlarm(int dayField) {
+    public boolean isDayActivated(int dayField) {
         return (mWeeklyAlarms & dayField) != 0;
     }
     
-    public void setDayAlarm(int dayField, boolean onOrOff) {
+    public void setDayActivated(int dayField, boolean onOrOff) {
         if (onOrOff) {
             mWeeklyAlarms |= dayField;
         } else {
@@ -169,6 +179,21 @@ public class Alarm implements Parcelable {
 
     public void setId(long id) {
         mId = id;
+    }
+    
+    public long getNextTrigger() {
+        if (mAlarmOn) {
+            DateTime alarmDt = mTime.toDateTimeToday();
+            for (int i = 0; i < 7; i++) {
+                if ((mWeeklyAlarms & (1 << (alarmDt.getDayOfWeek() - 1))) != 0) {
+                    if (alarmDt.isAfterNow()) {
+                        return alarmDt.getMillis();
+                    }
+                } 
+                alarmDt = alarmDt.plusDays(1);
+            }
+        }
+        return Long.MAX_VALUE;
     }
 
     public static final Parcelable.Creator<Alarm> CREATOR = new Parcelable.Creator<Alarm>() {
