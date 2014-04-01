@@ -43,8 +43,10 @@ public class Alarm implements Parcelable {
     
     private boolean mAlarmOn;
     private LocalTime mTime;
-    /** Stores bitwise if the alarm is enabled for each day of the week.
-     * Monday is bit 0 */
+    /**
+     * Stores bitwise if the alarm is enabled for each day of the week.
+     * Monday is bit 0, Sunday bit 6
+     */
     private int mWeeklyAlarms;
     /** optional id field */
     private long mId;
@@ -53,7 +55,7 @@ public class Alarm implements Parcelable {
      * Default alarm is off, with time set to current time and all week days activated
      */
     public Alarm() {
-        this(false, new LocalTime(), 0x7F, -1);
+        this(false, new LocalTime(), 0x7F);
     }
     
     public Alarm(boolean alarmOn, LocalTime time, int weeklyAlarms) {
@@ -71,7 +73,14 @@ public class Alarm implements Parcelable {
         setValues(json);
     }
 
-    public Alarm(Parcel in) {
+    /**
+     * Build an Alarm from the data stored in the SharedPreferences.
+     */
+    public Alarm(String alarmData) {
+        setValues(alarmData);
+    }
+
+    private Alarm(Parcel in) {
         mAlarmOn = in.readByte() != 0;
         String time = in.readString();
         mTime = TIME_FMT.parseLocalTime(time);
@@ -110,18 +119,22 @@ public class Alarm implements Parcelable {
         return toJSON().toString();
     }
     
-    public void setValues(String alarmData) {
+    /**
+     * Used by AlarmPreference to set all the Alarm values to the ones stored in the
+     * SharedPreferences as a String.
+     */
+    void setValues(String alarmData) {
         if (alarmData != null) {
             try {
                 JSONObject json = new JSONObject(alarmData);
                 setValues(json);
             } catch (JSONException e) {
-                throw new RuntimeException("Parsing alarm from invalid String alarmData", e);
+                throw new RuntimeException("Parsing alarm from invalid string: " + alarmData, e);
             }
         }
     }
 
-    public void setValues(JSONObject json) {
+    private void setValues(JSONObject json) {
         mAlarmOn = json.optBoolean(KEY_ALARM_ON, true);
         String time = json.optString(KEY_TIME, null);
         mTime = time != null ? TIME_FMT.parseLocalTime(time) : new LocalTime();
@@ -161,10 +174,18 @@ public class Alarm implements Parcelable {
         mWeeklyAlarms = weeklyAlarms;
     }
     
+    /**
+     * @param dayField Use constants {@link #Monday} to {@link #Sunday}
+     * @return True if the alarm is on for that day
+     */
     public boolean isDayActivated(int dayField) {
         return (mWeeklyAlarms & dayField) != 0;
     }
     
+    /**
+     * @param dayField Use constants {@link #Monday} to {@link #Sunday}
+     * @param onOrOff True if alarm should be on that day
+     */
     public void setDayActivated(int dayField, boolean onOrOff) {
         if (onOrOff) {
             mWeeklyAlarms |= dayField;
@@ -173,20 +194,28 @@ public class Alarm implements Parcelable {
         }
     }
     
+    /** Get the optional id of the alarm. */
     public long getId() {
         return mId;
     }
 
+    /** Set an optional id to the alarm. */
     public void setId(long id) {
         mId = id;
     }
     
+    /**
+     * Calculates the next time that the alarm should go off.
+     * 
+     * @return Next trigger time as a UNIX timestamp or {@link Long#MAX_VALUE} if alarm is off.
+     */
     public long getNextTrigger() {
         if (mAlarmOn) {
             DateTime alarmDt = mTime.toDateTimeToday();
-            for (int i = 0; i < 7; i++) {
+            for (int i = 0; i < 8; i++) {
                 if ((mWeeklyAlarms & (1 << (alarmDt.getDayOfWeek() - 1))) != 0) {
-                    if (alarmDt.isAfterNow()) {
+                    //if today, we make sure the time is not in the past
+                    if (i > 0 || alarmDt.isAfterNow()) {
                         return alarmDt.getMillis();
                     }
                 } 
@@ -195,12 +224,37 @@ public class Alarm implements Parcelable {
         }
         return Long.MAX_VALUE;
     }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Alarm)) {
+            return false;
+        }
+        Alarm other = (Alarm) o;
+        return mAlarmOn == other.isAlarmOn() && mTime.equals(other.getTime())
+                && mWeeklyAlarms == other.getWeeklyAlarms() && mId == other.getId();
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 43;
+        result = 31 * result + (mAlarmOn ? 1 : 0);
+        result = 31 * result + (mTime != null ? mTime.hashCode() : 0);
+        result = 31 * result + mWeeklyAlarms;
+        result = 31 * result + (int) (mId ^ (mId >>> 32));
+        return result;
+    }
 
     public static final Parcelable.Creator<Alarm> CREATOR = new Parcelable.Creator<Alarm>() {
+        @Override
         public Alarm createFromParcel(Parcel in) {
             return new Alarm(in);
         }
 
+        @Override
         public Alarm[] newArray(int size) {
             return new Alarm[size];
         }
